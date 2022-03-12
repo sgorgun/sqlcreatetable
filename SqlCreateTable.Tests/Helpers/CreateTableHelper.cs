@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using SqlCreateTable.Tests.Models;
-using SqlCreateTable.Tests.Parsers;
+using AutocodeDB.Models;
+using AutocodeDB.Parsers;
 
-namespace SqlCreateTable.Tests.Helpers
+namespace AutocodeDB.Helpers
 {
     public static class CreateTableHelper
     {
@@ -21,9 +21,9 @@ namespace SqlCreateTable.Tests.Helpers
             var table = QueryParser.ParseTable(query);
             foreach(var fk in table.ForeignKeys)
             {
-                var precedence = _tableMap[table.TableName].Precedence;
+                var sequenceNumber = _tableMap[table.TableName].SequenceNumber;
                 var refTable = _tableMap[fk.RefTable];
-                if (precedence < refTable.Precedence)
+                if (sequenceNumber < refTable.SequenceNumber)
                     throw new ArgumentException($"Table '{fk.RefTable}' must be created before table '{table.TableName}'.");
                 if (!refTable.ColumnList.ContainsKey(fk.RefColumn))
                     throw new ArgumentException($"Foreign key '{fk.LocalColumn}' in table '{table.TableName}' REFERENCES not existing column '{fk.RefColumn}' in table '{fk.RefTable}'.");
@@ -40,13 +40,15 @@ namespace SqlCreateTable.Tests.Helpers
 
         private static void LoadTables(IEnumerable<string> queries)
         {
-            if (_tableMap is { }) return;
-            _tableMap = new Dictionary<string, DbTable>();
-            for (var i = 0; i < queries.Count(); i++)
+            if (_tableMap is { }) 
+                return;
+            _tableMap = new Dictionary<string, DbTable>(13);
+            int i = 0;
+            foreach(var query in queries)
             {
-                var query = queries.ElementAt(i);
                 var table = QueryParser.ParseTable(query);
-                table.Precedence = i;
+                table.SequenceNumber = i;
+                ++i;
                 _tableMap.Add(table.TableName, table);
             }
         }

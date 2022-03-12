@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SqlCreateTable.Tests.Models
+namespace AutocodeDB.Models
 {
     public class DbTable
     {
         public string TableName { get; set; }
         public Dictionary<string, string> ColumnList { get; }
         public List<DbTableForeignKey> ForeignKeys { get; }
-        public int Precedence { get; set; }
+        public int SequenceNumber { get; set; }
         
         public DbTable()
         {
@@ -18,7 +18,7 @@ namespace SqlCreateTable.Tests.Models
 
         public override string ToString()
         {
-            return $"{TableName}:"+string.Join(',',ColumnList)+";"+string.Join(',',ForeignKeys);
+            return $"{TableName}({SequenceNumber}):"+string.Join(',',ColumnList)+";"+string.Join(',',ForeignKeys);
         }
     }
 }

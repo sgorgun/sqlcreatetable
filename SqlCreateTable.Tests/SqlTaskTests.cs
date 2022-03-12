@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Microsoft.Data.Sqlite;
 using System.IO;
-using SqlCreateTable.Tests.Helpers;
+using AutocodeDB.Helpers;
 
 namespace SqlCreateTable.Tests
 {
@@ -13,7 +13,7 @@ namespace SqlCreateTable.Tests
         private const int CreateQueriesCount = 7;
         private const string CreateQueriesFileName = "create.sql";
         private static readonly string CreateQueriesFile = SqlTask.GetQueriesFullPath(CreateQueriesFileName);
-        private static readonly string[] CreateQueries = QueryHelper.GetAllQueries(CreateQueriesFile);
+        private static readonly string[] CreateQueries = QueryHelper.GetQueries(CreateQueriesFile);
         private static readonly IEnumerable<string> CreateQueriesWithForeignKeys = 
             CreateTableHelper.GetOnlyQueriesWithForeignKeys(CreateQueries);
 

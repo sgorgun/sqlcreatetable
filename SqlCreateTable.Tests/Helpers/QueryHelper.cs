@@ -1,24 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace SqlCreateTable.Tests.Helpers
+namespace AutocodeDB.Helpers
 {
     internal static class QueryHelper
     {
-        private const string BlockComments = @"/\*(.*?)\*/";
+        private const string BlockComments = @"/\*.*\*/";//@"/\*(.*?)\*/";
         private const string LineComments = @"--(.*$?)";
-
-        public static string[] GetAllQueries(string fileName)
+        public static string GetQuery(string file)
         {
-            if (!File.Exists(fileName))
-                return Array.Empty<string>();
+            if (!File.Exists(file))
+                return null;
+            var rawData = File.ReadAllText(file);
+            if (rawData.Length == 0)
+                return string.Empty;
+            rawData = RemoveComments(rawData);
+            return rawData;
+        }
 
-            var rawData = File.ReadAllText(fileName);
+        public static string[] GetQueries(string file)
+        {
+            var rawData = File.ReadAllText(file);
             rawData = RemoveComments(rawData);
             return ParseQueries(rawData);
+        }
+
+        public static string[] GetQueries(string[] files)
+        {
+            StreamWriter writer = new StreamWriter("log.txt", true);
+            for (int i = 0; i < files.Length; i++)
+            {
+                files[i] = GetQuery(files[i]);
+            }
+            return files;
         }
 
         public static string ComposeErrorMessage(string query, Exception ex = null, string message = null)
@@ -31,13 +48,12 @@ namespace SqlCreateTable.Tests.Helpers
         {
             return ComposeErrorMessage(query, null, message);
         }
-        
-        public static bool IsQueryCorrect(IEnumerable<string> queries, Func<string, bool> isCorrect) => queries.Any(isCorrect);
 
-        private static string RemoveComments(string rawData)
+        public static bool IsQueryCorrect(IEnumerable<string> queries, Func<string, bool> isCorrect) => queries.Any(isCorrect);
+        public static string RemoveComments(string rawData)
         {
-            rawData = Regex.Replace(rawData, LineComments, "");
-            rawData = Regex.Replace(rawData, BlockComments, "", RegexOptions.Multiline);
+            rawData = Regex.Replace(rawData, LineComments, "", RegexOptions.Multiline);
+            rawData = Regex.Replace(rawData, BlockComments, "", RegexOptions.Singleline);
             rawData = Regex.Replace(rawData, @"\s+", " ");
             return rawData;
         }

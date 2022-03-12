@@ -1,4 +1,4 @@
-﻿namespace SqlCreateTable.Tests.Models
+﻿namespace AutocodeDB.Models
 {
     public class DbTableForeignKey
     {

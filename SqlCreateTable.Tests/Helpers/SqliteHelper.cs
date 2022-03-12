@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.Data.Sqlite;
 
-namespace SqlCreateTable.Tests.Helpers
+namespace AutocodeDB.Helpers
 {
     public static class SqliteHelper
     {
