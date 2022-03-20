@@ -1,30 +1,18 @@
-﻿using System.Data;
-using System.IO;
+﻿using System;
+using System.Data;
 using Microsoft.Data.Sqlite;
+using System.Collections.Generic;
 
 namespace AutocodeDB.Helpers
 {
-    public static class SqliteHelper
+    internal static class SqliteHelper
     {
-        private const string DbDirectory = "./DB";
+        public static SqliteConnection Connection { get; set; }
 
-        private static string _dataSource;
-
-        public static SqliteConnection Connection { get; private set; }
-
-        public static void OpenConnection(string fileName)
+        static SqliteHelper()
         {
-            PrepareDataSource(fileName);
-
-            var connectionString = new SqliteConnectionStringBuilder
-            {
-                DataSource = _dataSource,
-                Mode = SqliteOpenMode.ReadWriteCreate,
-                ForeignKeys = true,
-            }.ConnectionString;
-
+            var connectionString = InMemoryConnectionString();
             Connection = new SqliteConnection(connectionString);
-            Connection.Open();
         }
 
         public static void OpenConnection()
@@ -39,28 +27,64 @@ namespace AutocodeDB.Helpers
             Connection = new SqliteConnection(connectionString);
             Connection.Open();
         }
+        public static void OpenConnection(string file)
+        {
+            Connection.Open();
+            var connectionString = FileConnectionString(file, readOnly: true);
+            using var source = new SqliteConnection(connectionString);
+            source.Open();
+            source.BackupDatabase(Connection);
+            source.Close();
+        }
 
-        public static void CloseConnection(bool deleteDataSource = true)
+        public static void OpenConnection(string importFile, string exportFile)
+        {
+            var exportString = FileConnectionString(exportFile);
+            Connection = new SqliteConnection(exportString);
+            Connection.Open();
+
+            var importString = FileConnectionString(importFile, readOnly: true);
+            using var importConnection = new SqliteConnection(importString);
+            importConnection.Open();
+            importConnection.BackupDatabase(Connection);
+            importConnection.Close();
+        }
+
+        public static void CloseConnection()
         {
             if (Connection.State is ConnectionState.Open)
                 Connection.Close();
-            if (deleteDataSource)
-                DeleteDataSource();
         }
 
-        private static void PrepareDataSource(string fileName)
+        private static string InMemoryConnectionString() => new SqliteConnectionStringBuilder
         {
-            Directory.CreateDirectory(DbDirectory);
-            _dataSource = Path.Combine(DbDirectory, fileName);
-            if (File.Exists(_dataSource))
-                File.Delete(_dataSource);
+            Mode = SqliteOpenMode.Memory
+        }.ConnectionString;
+
+        private static string FileConnectionString(string fileName, bool readOnly = false) => new SqliteConnectionStringBuilder
+        {
+            DataSource = fileName,
+            Mode = readOnly ? SqliteOpenMode.ReadOnly : SqliteOpenMode.ReadWriteCreate
+        }.ConnectionString;
+
+        public static int CountRows(string tableName)
+        {
+            var countCmd = new SqliteCommand($"SELECT COUNT(*) FROM {tableName}", Connection);
+            return Convert.ToInt32(countCmd.ExecuteScalar());
         }
 
-        private static void DeleteDataSource()
+        public static int[] CountRows(string tableName, string columnName)
         {
-            if (Directory.Exists(DbDirectory))
-                Directory.Delete(DbDirectory, true);
-            _dataSource = null;
+            var countCmd = new SqliteCommand($"SELECT {columnName}, COUNT({columnName}) FROM {tableName} GROUP BY {columnName}", Connection);
+            var reader = countCmd.ExecuteReader();
+            List<int> ListRes = new List<int>();
+            while (reader.Read())
+            {
+                ListRes.Add(reader.GetInt32(1));
+            }
+            return ListRes.ToArray();
         }
+
     }
+
 }
