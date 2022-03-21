@@ -89,7 +89,13 @@ namespace SqlCreateTable.Tests
                 Assert.Fail(message); 
             }
         }
-
+        [TestCaseSource(nameof(CreateQueriesWithForeignKeys))]
+        public void CreateQueriesWithForeignKeys_OnDeleteCascadeNotExist(string query)
+        {
+            var message = QueryHelper.ComposeErrorMessage(query, "Each table should not contain ON DELETE CASCADE.");
+            var actual = CreateTableHelper.ContainsOnDeleteCascade(query);
+            Assert.IsFalse(actual, message);
+        }
         #endregion
     }
 }
