@@ -4,7 +4,7 @@
 
 Create a database scheme for the domain (see description). The BD scheme must correspond to at least the third normal form (3NF).
 
-DB should contain at least 7 tables with primary and foreign keys, unique, not null attributes where it is suitable. Do not use ALTER operations and cascading deletion from tables.
+DB should contain at least 7 tables with primary and foreign keys, unique, not null attributes where it is suitable. Do not use ALTER operations and cascading deletion from tables. Please use only simple primary and foreign keys (single column/attribute)
 
 ### Domain description   
 
