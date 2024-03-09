@@ -39,16 +39,19 @@ CREATE TABLE m2m_project_employee (
     e_id INT NOT NULL,
     p_id INT NOT NULL,
     pos_id INT NOT NULL,
+    CONSTRAINT PK_m2m_project_employee UNIQUE (e_id, p_id),
     CONSTRAINT FK_m2m_project_employee_employee FOREIGN KEY (e_id) REFERENCES employee (e_id),
     CONSTRAINT FK_m2m_project_employee_project FOREIGN KEY (p_id) REFERENCES project (p_id),
     CONSTRAINT FK_m2m_project_employee_position FOREIGN KEY (pos_id) REFERENCES position (pos_id)
 );
 
-CREATE TABLE m2m_task_statuses (
+CREATE TABLE m2m_task_statuses
+(
     s_id INT NOT NULL,
     t_id INT NOT NULL,
     s_date DATE NULL,
     e_id INT NULL,
+    CONSTRAINT PK_m2m_task_statuses UNIQUE (s_id, t_id),
     CONSTRAINT FK_m2m_task_statuses_employee FOREIGN KEY (e_id) REFERENCES employee (e_id),
     CONSTRAINT FK_m2m_task_statuses_task FOREIGN KEY (t_id) REFERENCES task (t_id),
     CONSTRAINT FK_m2m_task_statuses_statuses FOREIGN KEY (s_id) REFERENCES statuses (s_id)
