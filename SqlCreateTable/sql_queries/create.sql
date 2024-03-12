@@ -1,58 +1,52 @@
-CREATE TABLE employee (
-    e_id INT IDENTITY (1, 1) NOT NULL,
-    e_name NVARCHAR (50) NULL,
-    e_surname NVARCHAR (50) NULL,
-    CONSTRAINT PK_employee PRIMARY KEY (e_id)
+CREATE TABLE Employee (
+    id INTEGER PRIMARY KEY,
+    e_name TEXT NOT NULL,
+    e_surname TEXT NOT NULL
 );
 
-CREATE TABLE project (
-    p_id INT IDENTITY (1, 1) NOT NULL,
-    p_name NVARCHAR (50) NULL,
-    p_date_of_creation DATE NULL,
-    p_statuses CHAR (10) NULL,
-    p_date_of_closure DATE NULL,
-    CONSTRAINT PK_project PRIMARY KEY (p_id)
+CREATE TABLE Project (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    creation_date DATE NOT NULL,
+    p_status TEXT NOT NULL,
+    closure_date DATE
 );
 
-CREATE TABLE task (
-    t_id INT IDENTITY (1, 1) NOT NULL,
-    p_id INT NOT NULL,
-    t_description NVARCHAR (50) NULL,
-    t_deadline DATE NULL,
-    CONSTRAINT PK_task PRIMARY KEY (t_id),
-    CONSTRAINT FK_task_project_project FOREIGN KEY (p_id) REFERENCES project (p_id)
+CREATE TABLE Position (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
 );
 
-CREATE TABLE position (
-    pos_id INT IDENTITY (1, 1) NOT NULL,
-    pos_name NCHAR (10) NULL,
-    CONSTRAINT PK_position PRIMARY KEY (pos_id)
+CREATE TABLE EmployeeProject (
+    id INTEGER UNIQUE PRIMARY KEY,
+    employee_id INTEGER,
+    project_id INTEGER,
+    position_id INTEGER,
+    FOREIGN KEY (employee_id) REFERENCES Employee(id),
+    FOREIGN KEY (project_id) REFERENCES Project(id),
+    FOREIGN KEY (position_id) REFERENCES Position(id)
 );
 
-CREATE TABLE statuses (
-    s_id INT IDENTITY (1, 1) NOT NULL,
-    s_name NVARCHAR (50) NULL,
-    CONSTRAINT PK_statuses PRIMARY KEY (s_id)
+CREATE TABLE Task (
+    id INTEGER PRIMARY KEY,
+    project_id INTEGER,
+    description TEXT NOT NULL,
+    deadline DATE NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES Project(id)
 );
 
-CREATE TABLE m2m_project_employee (
-    e_id INT NOT NULL,
-    p_id INT NOT NULL,
-    pos_id INT NOT NULL,
-    CONSTRAINT PK_m2m_project_employee UNIQUE (e_id, p_id),
-    CONSTRAINT FK_m2m_project_employee_employee FOREIGN KEY (e_id) REFERENCES employee (e_id),
-    CONSTRAINT FK_m2m_project_employee_project FOREIGN KEY (p_id) REFERENCES project (p_id),
-    CONSTRAINT FK_m2m_project_employee_position FOREIGN KEY (pos_id) REFERENCES position (pos_id)
+CREATE TABLE TaskStatus (
+    id INTEGER PRIMARY KEY,
+    t_status TEXT NOT NULL,
+    set_date DATE NOT NULL
 );
 
-CREATE TABLE m2m_task_statuses
-(
-    s_id INT NOT NULL,
-    t_id INT NOT NULL,
-    s_date DATE NULL,
-    e_id INT NULL,
-    CONSTRAINT PK_m2m_task_statuses UNIQUE (s_id, t_id),
-    CONSTRAINT FK_m2m_task_statuses_employee FOREIGN KEY (e_id) REFERENCES employee (e_id),
-    CONSTRAINT FK_m2m_task_statuses_task FOREIGN KEY (t_id) REFERENCES task (t_id),
-    CONSTRAINT FK_m2m_task_statuses_statuses FOREIGN KEY (s_id) REFERENCES statuses (s_id)
+CREATE TABLE EmployeeTask (
+    id INTEGER UNIQUE PRIMARY KEY,
+    employee_id INTEGER,
+    task_id INTEGER,
+    status_id INTEGER,
+    FOREIGN KEY (employee_id) REFERENCES Employee(id),
+    FOREIGN KEY (task_id) REFERENCES Task(id),
+    FOREIGN KEY (status_id) REFERENCES TaskStatus(id)
 );
